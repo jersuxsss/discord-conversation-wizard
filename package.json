@@ -1,0 +1,71 @@
+{
+  "name": "discord-conversation-wizard",
+  "version": "1.0.0",
+  "description": "A powerful, library-agnostic wizard for creating multi-step conversations and forms in Discord bots. Supports discord.js and Eris with advanced validation, middleware, and state management.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "discord.js",
+    "eris",
+    "wizard",
+    "conversation",
+    "multi-step-form",
+    "forms",
+    "collector",
+    "interaction",
+    "modal",
+    "select-menu",
+    "validation",
+    "typescript",
+    "bot-framework"
+  ],
+  "author": {
+    "name": "Jersuxs",
+    "url": "https://github.com/jersuxsss"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jersuxsss/discord-conversation-wizard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jersuxsss/discord-conversation-wizard/issues"
+  },
+  "homepage": "https://github.com/jersuxsss/discord-conversation-wizard#readme",
+  "license": "MIT",
+  "peerDependencies": {
+    "discord.js": "^14.0.0",
+    "eris": "^0.17.0"
+  },
+  "peerDependenciesMeta": {
+    "discord.js": {
+      "optional": true
+    },
+    "eris": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "discord.js": "^14.25.1",
+    "eris": "^0.17.2",
+    "eslint": "^8.0.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.0.0"
+  }
+}
