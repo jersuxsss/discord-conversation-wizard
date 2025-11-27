@@ -4,9 +4,13 @@
 
 A powerful, **library-agnostic** wizard for creating multi-step conversations and forms in Discord bots.
 
-[![npm version](https://img.shields.io/npm/v/discord-conversation-wizard.svg)](https://www.npmjs.com/package/discord-conversation-wizard)
+[![npm version](https://img.shields.io/npm/v/discord-conversation-wizard?color=blue&logo=npm)](https://www.npmjs.com/package/discord-conversation-wizard)
+[![npm downloads](https://img.shields.io/npm/dm/discord-conversation-wizard?color=blue&logo=npm)](https://www.npmjs.com/package/discord-conversation-wizard)
+[![npm bundle size](https://img.shields.io/bundlephobia/min/discord-conversation-wizard?color=blue)](https://bundlephobia.com/package/discord-conversation-wizard)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jersuxsss/discord-conversation-wizard/ci.yml?branch=main&logo=github)](https://github.com/jersuxsss/discord-conversation-wizard/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
+[![GitHub Stars](https://img.shields.io/github/stars/jersuxsss/discord-conversation-wizard?style=social)](https://github.com/jersuxsss/discord-conversation-wizard)
 
 </div>
 
