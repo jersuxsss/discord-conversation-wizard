@@ -223,9 +223,12 @@ describe('Wizard', () => {
             });
 
             wizard.on('step', () => {
-                expect(beforeStep).toHaveBeenCalled();
-                wizard.cancel();
-                done();
+                // Give middleware time to execute since it's async
+                setTimeout(() => {
+                    expect(beforeStep).toHaveBeenCalled();
+                    wizard.cancel();
+                    done();
+                }, 10);
             });
 
             wizard.start({
