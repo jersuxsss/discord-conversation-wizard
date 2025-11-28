@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-11-28
+
+### Added
+
+#### Built-in Validators Library
+- **Email Validator** - RFC 5322 compliant email validation with custom error messages
+- **URL Validator** - HTTP/HTTPS URL validation with protocol requirements and optional protocol support
+- **Phone Validator** - International phone number validation in E.164 format
+- **Regex Validator** - Custom regex pattern matching with configurable flags
+- **Length Validator** - String length validation with min/max constraints
+- **Range Validator** - Numeric range validation for numbers
+- **Combine Validator** - Combine multiple validators with AND logic
+- **OneOf Validator** - Validate against a list of allowed values
+- All validators support custom error messages
+- Complete TypeScript type definitions for all validators
+- Comprehensive JSDoc documentation
+
+#### Progress Indicators
+- Visual progress tracking throughout wizard steps
+- Configurable progress format with placeholders: `{current}`, `{total}`, `{percent}`
+- Default format: `📊 Step {current}/{total}`
+- Automatically displays progress before each step prompt
+- Enabled via `showProgress` option in `WizardOptions`
+
+#### Timeout Warnings
+- Configurable warnings before step timeout expires
+- Boolean option for default 15-second warning before timeout
+- Numeric option to specify custom warning time (in seconds)
+- Custom warning message support via `timeoutWarningMessage`
+- Automatically clears warnings when responses are received
+- Enabled via `timeoutWarning` option in `WizardOptions`
+
+### Documentation
+- Updated README with comprehensive examples for all new features
+- Added built-in validators section with usage examples
+- Added progress indicators section with format customization guide
+- Added timeout warnings section with configuration options
+- Created `validators-example.js` demonstrating all validators
+- Created `progress-example.js` showing progress and timeout features
+
+### Testing
+- Complete test suite for all validators (`validators.test.ts`)
+- Tests for email, URL, phone, regex, length, range, combine, and oneOf validators
+- Edge case coverage and custom error message testing
+
+### Infrastructure
+- Exported validators module from main index
+- Updated TypeScript types for new `WizardOptions` fields
+- Maintained full backward compatibility (no breaking changes)
+
 ## [1.0.0] - 2025-11-27
 
 ### Added

@@ -67,6 +67,14 @@ export interface WizardOptions {
     allowCancel?: boolean;
     sessionId?: string;
     persistSession?: boolean;
+    /** Show progress indicator in wizard messages (e.g., "Step 2/5") */
+    showProgress?: boolean;
+    /** Custom progress format string. Use {current}, {total}, {percent} placeholders */
+    progressFormat?: string;
+    /** Show warning before timeout. If number, shows warning N seconds before timeout */
+    timeoutWarning?: boolean | number;
+    /** Custom timeout warning message */
+    timeoutWarningMessage?: string;
 }
 
 export interface WizardContext {

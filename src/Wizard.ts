@@ -22,6 +22,7 @@ export class Wizard extends EventEmitter {
     private stepHistory: number[] = [];
     private retryCount: number = 0;
     private sessions: Map<string, WizardSession> = new Map();
+    private timeoutWarningTimer: NodeJS.Timeout | null = null;
 
     constructor(adapter: AdapterInterface, options: WizardOptions) {
         super();
@@ -220,6 +221,12 @@ export class Wizard extends EventEmitter {
 
         let promptMessage = step.prompt;
 
+        // Add progress indicator if enabled
+        if (this.options.showProgress) {
+            const progressText = this.getProgressText();
+            promptMessage = `${progressText}\n\n${promptMessage}`;
+        }
+
         // Add navigation hints
         const hints: string[] = [];
         if (this.options.allowBack && this.stepHistory.length > 0) {
@@ -272,6 +279,9 @@ export class Wizard extends EventEmitter {
 
         const timeout = (step.timeout || this.options.timeout || 60) * 1000;
 
+        // Setup timeout warning
+        this.setupTimeoutWarning(timeout);
+
         if (step.type === StepType.SELECT_MENU || step.type === StepType.CONFIRMATION) {
             const filter = (interaction: any) => this.adapter.getAuthorId(interaction) === this.context?.userId;
 
@@ -284,6 +294,8 @@ export class Wizard extends EventEmitter {
                 });
 
                 const value = this.adapter.getComponentValue(interaction);
+
+                this.clearTimeoutWarning(); // Clear warning after response
 
                 // Handle multi-select
                 if (step.allowMultiple && Array.isArray(value)) {
@@ -368,6 +380,7 @@ export class Wizard extends EventEmitter {
             return num;
         }
 
+        this.clearTimeoutWarning(); // Clear warning after response
         return content;
     }
 
@@ -411,6 +424,56 @@ export class Wizard extends EventEmitter {
         this.isRunning = false;
         if (this.options.persistSession) {
             this.sessions.delete(this.sessionId);
+        }
+        this.clearTimeoutWarning();
+    }
+
+    private getProgressText(): string {
+        const current = this.currentStepIndex + 1;
+        const total = this.steps.length;
+        const percent = Math.round((current / total) * 100);
+
+        const format = this.options.progressFormat || '📊 Step {current}/{total}';
+
+        return format
+            .replace('{current}', current.toString())
+            .replace('{total}', total.toString())
+            .replace('{percent}', percent.toString());
+    }
+
+    private setupTimeoutWarning(timeout: number) {
+        // Clear any existing warning timer
+        this.clearTimeoutWarning();
+
+        if (!this.options.timeoutWarning || !this.context) {
+            return;
+        }
+
+        // Calculate warning time
+        let warningTime: number;
+        if (typeof this.options.timeoutWarning === 'number') {
+            warningTime = timeout - (this.options.timeoutWarning * 1000);
+        } else {
+            // Default to 15 seconds before timeout
+            warningTime = timeout - 15000;
+        }
+
+        // Only set warning if it's positive
+        if (warningTime > 0) {
+            this.timeoutWarningTimer = setTimeout(async () => {
+                if (this.context) {
+                    const message = this.options.timeoutWarningMessage ||
+                        '⚠️ Warning: Your response time is running out. Please respond soon!';
+                    await this.adapter.sendMessage(this.context.channelId, message);
+                }
+            }, warningTime);
+        }
+    }
+
+    private clearTimeoutWarning() {
+        if (this.timeoutWarningTimer) {
+            clearTimeout(this.timeoutWarningTimer);
+            this.timeoutWarningTimer = null;
         }
     }
 

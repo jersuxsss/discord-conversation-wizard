@@ -19,6 +19,9 @@ A powerful, **library-agnostic** wizard for creating multi-step conversations an
 - 🔄 **Library Agnostic** - Works with discord.js v14+ and Eris v0.17+
 - ⚡ **Type-Safe** - Full TypeScript support with comprehensive type definitions
 - 🎯 **Advanced Validation** - Built-in validators with custom validation support
+- 📚 **Built-in Validators** - Email, URL, phone, regex, length, range, and more (v1.1.0+)
+- 📊 **Progress Indicators** - Visual progress tracking with customizable format (v1.1.0+)
+- ⏱️ **Timeout Warnings** - Configurable warnings before response timeout (v1.1.0+)
 - 🪝 **Middleware System** - Hooks for beforeStep, afterStep, onError, and more
 - 🧭 **Step Navigation** - Back, skip, jump to step, and cancel functionality
 - 🔀 **Conditional Steps** - Show/hide steps based on previous responses
@@ -343,6 +346,117 @@ Configure maximum retry attempts for validation failures:
     },
 }
 ```
+
+### Built-in Validators (v1.1.0+)
+
+Use pre-built validators for common validation patterns:
+
+```typescript
+import { validators } from 'discord-conversation-wizard';
+
+const wizard = new Wizard(adapter, {
+    steps: [
+        {
+            id: 'email',
+            type: StepType.TEXT,
+            prompt: '📧 Enter your email:',
+            validate: validators.email(),
+            transform: (value) => value.toLowerCase().trim(),
+        },
+        {
+            id: 'website',
+            type: StepType.TEXT,
+            prompt: '🌐 Enter your website:',
+            validate: validators.url({ requireProtocol: false }),
+        },
+        {
+            id: 'phone',
+            type: StepType.TEXT,
+            prompt: '📱 Enter your phone number:',
+            validate: validators.phone(),
+        },
+        {
+            id: 'username',
+            type: StepType.TEXT,
+            prompt: '👤 Enter your username:',
+            validate: validators.regex(/^[a-zA-Z0-9_]{3,16}$/, {
+                message: 'Username must be 3-16 characters (letters, numbers, underscores only)'
+            }),
+        },
+        {
+            id: 'bio',
+            type: StepType.TEXT,
+            prompt: '📝 Write your bio:',
+            validate: validators.length({ min: 10, max: 500 }),
+        },
+        {
+            id: 'age',
+            type: StepType.NUMBER,
+            prompt: '🎂 Enter your age:',
+            validate: validators.range({ min: 13, max: 120 }),
+        },
+        {
+            id: 'password',
+            type: StepType.TEXT,
+            prompt: '🔒 Create a password:',
+            validate: validators.combine([
+                validators.length({ min: 8, max: 128 }),
+                validators.regex(/[A-Z]/, { message: 'Must contain uppercase' }),
+                validators.regex(/[0-9]/, { message: 'Must contain number' }),
+            ]),
+        },
+    ],
+});
+```
+
+**Available Validators:**
+- `validators.email()` - Valid email address
+- `validators.url()` - Valid URL with optional protocol requirements
+- `validators.phone()` - International phone number format
+- `validators.regex(pattern)` - Custom regex pattern matching
+- `validators.length({ min, max })` - String length validation
+- `validators.range({ min, max })` - Numeric range validation
+- `validators.combine([...])` - Combine multiple validators (AND logic)
+- `validators.oneOf([...])` - Value must be in allowed list
+
+### Progress Indicators (v1.1.0+)
+
+Show visual progress throughout the wizard:
+
+```typescript
+const wizard = new Wizard(adapter, {
+    steps: [...],
+    showProgress: true,
+    progressFormat: '📊 Step {current}/{total}', // or '{percent}%'
+});
+```
+
+**Format Placeholders:**
+- `{current}` - Current step number (1-indexed)
+- `{total}` - Total number of steps
+- `{percent}` - Progress percentage (0-100)
+
+**Default format:** `📊 Step {current}/{total}`
+
+### Timeout Warnings (v1.1.0+)
+
+Send warnings before response timeout expires:
+
+```typescript
+const wizard = new Wizard(adapter, {
+    steps: [...],
+    timeout: 60, // seconds
+    timeoutWarning: true, // warns 15 seconds before by default
+    // OR
+    timeoutWarning: 20, // warns 20 seconds before timeout
+    timeoutWarningMessage: '⏰ Hurry! Time is running out!',
+});
+```
+
+**Options:**
+- `timeoutWarning: true` - Warns 15 seconds before timeout (default)
+- `timeoutWarning: <number>` - Warns N seconds before timeout
+- `timeoutWarningMessage` - Custom warning message
 
 ## 📚 API Reference
 

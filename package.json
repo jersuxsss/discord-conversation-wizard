@@ -1,6 +1,6 @@
 {
   "name": "discord-conversation-wizard",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A powerful, library-agnostic wizard for creating multi-step conversations and forms in Discord bots. Supports discord.js and Eris with advanced validation, middleware, and state management.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
