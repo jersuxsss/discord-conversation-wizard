@@ -7,7 +7,7 @@
 /**
  * Validator function type - returns true if valid, or an error message string if invalid
  */
-export type ValidatorFunction = (value: any) => boolean | string | Promise<boolean | string>;
+export type ValidatorFunction = (value: unknown) => boolean | string | Promise<boolean | string>;
 
 /**
  * Options for the email validator
@@ -76,20 +76,22 @@ export interface RangeValidatorOptions {
 }
 
 /**
+ * Options for the date validator
+ */
+export interface DateValidatorOptions {
+    /** Custom error message */
+    message?: string;
+    /** Minimum date */
+    min?: Date;
+    /** Maximum date */
+    max?: Date;
+}
+
+/**
  * Validates email addresses using RFC 5322 compliant regex
  * 
  * @param options - Email validator options
  * @returns Validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'email',
- *   type: StepType.TEXT,
- *   prompt: 'Enter your email:',
- *   validate: validators.email()
- * }
- * ```
  */
 export function email(options: EmailValidatorOptions = {}): ValidatorFunction {
     const defaultMessage = 'Please enter a valid email address';
@@ -100,7 +102,7 @@ export function email(options: EmailValidatorOptions = {}): ValidatorFunction {
         ? /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         : /^[a-zA-Z0-9.!#$%&'*\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-    return (value: any): boolean | string => {
+    return (value: unknown): boolean | string => {
         if (typeof value !== 'string') {
             return message;
         }
@@ -126,16 +128,6 @@ export function email(options: EmailValidatorOptions = {}): ValidatorFunction {
  * 
  * @param options - URL validator options
  * @returns Validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'website',
- *   type: StepType.TEXT,
- *   prompt: 'Enter your website:',
- *   validate: validators.url({ protocols: ['https'] })
- * }
- * ```
  */
 export function url(options: URLValidatorOptions = {}): ValidatorFunction {
     const defaultMessage = 'Please enter a valid URL';
@@ -143,7 +135,7 @@ export function url(options: URLValidatorOptions = {}): ValidatorFunction {
     const protocols = options.protocols || ['http', 'https'];
     const requireProtocol = options.requireProtocol ?? true;
 
-    return (value: any): boolean | string => {
+    return (value: unknown): boolean | string => {
         if (typeof value !== 'string') {
             return message;
         }
@@ -181,22 +173,12 @@ export function url(options: URLValidatorOptions = {}): ValidatorFunction {
  * 
  * @param options - Phone validator options
  * @returns Validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'phone',
- *   type: StepType.TEXT,
- *   prompt: 'Enter your phone number:',
- *   validate: validators.phone()
- * }
- * ```
  */
 export function phone(options: PhoneValidatorOptions = {}): ValidatorFunction {
     const defaultMessage = 'Please enter a valid phone number (e.g., +1234567890)';
     const message = options.message || defaultMessage;
 
-    return (value: any): boolean | string => {
+    return (value: unknown): boolean | string => {
         if (typeof value !== 'string') {
             return message;
         }
@@ -224,18 +206,6 @@ export function phone(options: PhoneValidatorOptions = {}): ValidatorFunction {
  * @param pattern - Regular expression pattern
  * @param options - Regex validator options
  * @returns Validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'username',
- *   type: StepType.TEXT,
- *   prompt: 'Enter your username:',
- *   validate: validators.regex(/^[a-zA-Z0-9_]{3,16}$/, {
- *     message: 'Username must be 3-16 characters and contain only letters, numbers, and underscores'
- *   })
- * }
- * ```
  */
 export function regex(pattern: RegExp | string, options: RegexValidatorOptions = {}): ValidatorFunction {
     const defaultMessage = 'Input does not match the required format';
@@ -245,7 +215,7 @@ export function regex(pattern: RegExp | string, options: RegexValidatorOptions =
         ? new RegExp(pattern, options.flags)
         : pattern;
 
-    return (value: any): boolean | string => {
+    return (value: unknown): boolean | string => {
         if (typeof value !== 'string') {
             return message;
         }
@@ -263,21 +233,11 @@ export function regex(pattern: RegExp | string, options: RegexValidatorOptions =
  * 
  * @param options - Length validator options
  * @returns Validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'bio',
- *   type: StepType.TEXT,
- *   prompt: 'Enter your bio:',
- *   validate: validators.length({ min: 10, max: 500 })
- * }
- * ```
  */
 export function length(options: LengthValidatorOptions): ValidatorFunction {
     const { min, max, message } = options;
 
-    return (value: any): boolean | string => {
+    return (value: unknown): boolean | string => {
         if (typeof value !== 'string') {
             return message || 'Value must be a string';
         }
@@ -301,21 +261,11 @@ export function length(options: LengthValidatorOptions): ValidatorFunction {
  * 
  * @param options - Range validator options
  * @returns Validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'age',
- *   type: StepType.NUMBER,
- *   prompt: 'Enter your age:',
- *   validate: validators.range({ min: 13, max: 120 })
- * }
- * ```
  */
 export function range(options: RangeValidatorOptions): ValidatorFunction {
     const { min, max, message } = options;
 
-    return (value: any): boolean | string => {
+    return (value: unknown): boolean | string => {
         const num = typeof value === 'string' ? parseFloat(value) : value;
 
         if (typeof num !== 'number' || isNaN(num)) {
@@ -335,27 +285,42 @@ export function range(options: RangeValidatorOptions): ValidatorFunction {
 }
 
 /**
+ * Validates dates
+ * 
+ * @param options - Date validator options
+ * @returns Validator function
+ */
+export function date(options: DateValidatorOptions = {}): ValidatorFunction {
+    const defaultMessage = 'Please enter a valid date';
+    const message = options.message || defaultMessage;
+
+    return (value: unknown): boolean | string => {
+        const dateValue = new Date(value as string | number | Date);
+
+        if (isNaN(dateValue.getTime())) {
+            return message;
+        }
+
+        if (options.min && dateValue < options.min) {
+            return message;
+        }
+
+        if (options.max && dateValue > options.max) {
+            return message;
+        }
+
+        return true;
+    };
+}
+
+/**
  * Combines multiple validators with AND logic (all must pass)
  * 
  * @param validators - Array of validator functions to combine
  * @returns Combined validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'password',
- *   type: StepType.TEXT,
- *   prompt: 'Enter your password:',
- *   validate: validators.combine([
- *     validators.length({ min: 8, max: 128 }),
- *     validators.regex(/[A-Z]/, { message: 'Must contain an uppercase letter' }),
- *     validators.regex(/[0-9]/, { message: 'Must contain a number' })
- *   ])
- * }
- * ```
  */
 export function combine(validators: ValidatorFunction[]): ValidatorFunction {
-    return async (value: any): Promise<boolean | string> => {
+    return async (value: unknown): Promise<boolean | string> => {
         for (const validator of validators) {
             const result = await validator(value);
             if (result !== true) {
@@ -370,23 +335,13 @@ export function combine(validators: ValidatorFunction[]): ValidatorFunction {
  * Creates a validator that checks if value is one of the allowed values
  * 
  * @param allowedValues - Array of allowed values
- * @param options - Custom error message
+ * @param message - Custom error message
  * @returns Validator function
- * 
- * @example
- * ```typescript
- * {
- *   id: 'color',
- *   type: StepType.TEXT,
- *   prompt: 'Choose a color:',
- *   validate: validators.oneOf(['red', 'blue', 'green'])
- * }
- * ```
  */
-export function oneOf(allowedValues: any[], message?: string): ValidatorFunction {
+export function oneOf(allowedValues: unknown[], message?: string): ValidatorFunction {
     const defaultMessage = `Value must be one of: ${allowedValues.join(', ')}`;
 
-    return (value: any): boolean | string => {
+    return (value: unknown): boolean | string => {
         if (!allowedValues.includes(value)) {
             return message || defaultMessage;
         }
@@ -404,8 +359,10 @@ export const validators = {
     regex,
     length,
     range,
+    date,
     combine,
     oneOf,
 };
 
 export default validators;
+

@@ -14,7 +14,7 @@ export class Wizard extends EventEmitter {
     private adapter: AdapterInterface;
     private steps: WizardStep[];
     private currentStepIndex: number = 0;
-    private responses: Record<string, any> = {};
+    private responses: Record<string, unknown> = {};
     private context: WizardContext | null = null;
     private isRunning: boolean = false;
     private options: WizardOptions;
@@ -48,7 +48,7 @@ export class Wizard extends EventEmitter {
         this.stepHistory = [];
 
         if (this.options.persistSession) {
-            this.saveSession();
+            await this.saveSession();
         }
 
         this.emit('start', context);
@@ -56,7 +56,12 @@ export class Wizard extends EventEmitter {
     }
 
     public async resume(sessionId: string): Promise<boolean> {
-        const session = this.sessions.get(sessionId);
+        let session: WizardSession | null | undefined = this.sessions.get(sessionId);
+
+        if (!session && this.options.sessionStore) {
+            session = await this.options.sessionStore.load(sessionId);
+        }
+
         if (!session) {
             return false;
         }
@@ -76,15 +81,17 @@ export class Wizard extends EventEmitter {
         return true;
     }
 
-    public cancel() {
+    public async cancel() {
         if (!this.isRunning) {
             return;
         }
 
         const stepContext = this.getStepContext();
-        this.options.middleware?.onCancel?.(stepContext);
+        if (this.options.middleware?.onCancel) {
+            await this.options.middleware.onCancel(stepContext);
+        }
         this.emit('cancel', stepContext);
-        this.cleanup();
+        await this.cleanup();
     }
 
     public async goBack(): Promise<boolean> {
@@ -108,7 +115,9 @@ export class Wizard extends EventEmitter {
         const step = this.steps[this.currentStepIndex];
         const stepContext = this.getStepContext();
 
-        await step.onSkip?.(stepContext);
+        if (step.onSkip) {
+            await step.onSkip(stepContext);
+        }
         this.emit('skip', step, stepContext);
 
         this.currentStepIndex++;
@@ -151,7 +160,9 @@ export class Wizard extends EventEmitter {
             if (!this.context) throw new Error('Context is missing');
 
             // Call beforeStep middleware
-            await this.options.middleware?.beforeStep?.(step, stepContext);
+            if (this.options.middleware?.beforeStep) {
+                await this.options.middleware.beforeStep(step, stepContext);
+            }
 
             // Send prompt
             await this.sendStepPrompt(step);
@@ -182,7 +193,7 @@ export class Wizard extends EventEmitter {
                             this.context.channelId,
                             `Maximum retry attempts (${maxRetries}) reached. Please start over or contact support.`
                         );
-                        this.cancel();
+                        await this.cancel();
                         return;
                     }
 
@@ -195,14 +206,16 @@ export class Wizard extends EventEmitter {
             this.responses[step.id] = response;
 
             // Call afterStep middleware
-            await this.options.middleware?.afterStep?.(step, response, stepContext);
+            if (this.options.middleware?.afterStep) {
+                await this.options.middleware.afterStep(step, response, stepContext);
+            }
 
             // Save to history for back navigation
             this.stepHistory.push(this.currentStepIndex);
 
             // Save session if persistence is enabled
             if (this.options.persistSession) {
-                this.saveSession();
+                await this.saveSession();
             }
 
             this.currentStepIndex++;
@@ -210,9 +223,11 @@ export class Wizard extends EventEmitter {
 
         } catch (error) {
             const err = error as Error;
-            await this.options.middleware?.onError?.(err, step, stepContext);
+            if (this.options.middleware?.onError) {
+                await this.options.middleware.onError(err, step, stepContext);
+            }
             this.emit('error', err, step, stepContext);
-            this.cleanup();
+            await this.cleanup();
         }
     }
 
@@ -394,7 +409,7 @@ export class Wizard extends EventEmitter {
         };
     }
 
-    private saveSession() {
+    private async saveSession() {
         if (!this.context) return;
 
         const session: WizardSession = {
@@ -409,21 +424,29 @@ export class Wizard extends EventEmitter {
         };
 
         this.sessions.set(this.sessionId, session);
+        if (this.options.sessionStore) {
+            await this.options.sessionStore.save(session);
+        }
         this.emit('sessionSaved', session);
     }
 
     private async complete() {
         if (!this.context) return;
 
-        await this.options.middleware?.onComplete?.(this.responses, this.context);
+        if (this.options.middleware?.onComplete) {
+            await this.options.middleware.onComplete(this.responses, this.context);
+        }
         this.emit('complete', this.responses);
-        this.cleanup();
+        await this.cleanup();
     }
 
-    private cleanup() {
+    private async cleanup() {
         this.isRunning = false;
         if (this.options.persistSession) {
             this.sessions.delete(this.sessionId);
+            if (this.options.sessionStore) {
+                await this.options.sessionStore.delete(this.sessionId);
+            }
         }
         this.clearTimeoutWarning();
     }
@@ -478,7 +501,7 @@ export class Wizard extends EventEmitter {
     }
 
     // Public getters
-    public getResponses(): Record<string, any> {
+    public getResponses(): Record<string, unknown> {
         return { ...this.responses };
     }
 
